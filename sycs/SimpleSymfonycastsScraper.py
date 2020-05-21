@@ -1,13 +1,20 @@
 import requests
 from bs4 import BeautifulSoup
 import os
+import logging
 
 
 class SimpleSymfonycastScraper:
 
-    def __init__(self, course, start=None, end=-1):
+    def __init__(self, course, start=None, end=-1, debug=True):
         self.__session = None
         self.__token = None
+
+        if debug:
+            logging.basicConfig(filename='scraper.log', level=logging.DEBUG)
+        else:
+            pass
+
         try:
             self.__user_email = os.environ['SCS_USER']
             self.__user_passw = os.environ['SCS_PASS']
@@ -45,10 +52,24 @@ class SimpleSymfonycastScraper:
                 self.__rango['end'] = len(dynamic_download_links)
 
             for i in range(self.__rango['start'] - 1, self.__rango['end']):
-                yield self.__session.head(self.__session.head(dynamic_download_links[i]).headers['location']).headers[
-                    'location']
+                link = dynamic_download_links[i]
+                res_head = self.__session.head(link)
+
+                if res_head.status_code == requests.codes.forbidden:
+                    raise Exception("You don't have privileges (%s)" % res_head.url)
+
+                logging.debug(res_head.headers)
+
+                yield self.__session.head(res_head.headers['location']).headers['location']
 
     def __gen_dyn_down_link(self, dsl):
+        """Yields download dynamic links to chapter's video.
+
+        Parameters
+        ----------
+        dsl : Generator
+            Download suffixes
+        """
         for i in dsl:
             yield self.__BASE_URL + i + self.__DOWNLOAD_SUFFIX
 
