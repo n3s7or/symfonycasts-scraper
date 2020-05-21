@@ -22,12 +22,12 @@ $ symfonycasts_scraper.py --course symfony4
 In order to provide credentials you must set the following environment variables:
 
 Linux like:
-* export SCS_USER='testuser@gmail.com'
-* export SCS_PASS='T3s7U$erPass123*'
+* export SCS_USER=testuser@gmail.com
+* export SCS_PASS=T3s7U$erPass123*
 
 Windows:
-* set SCS_USER='testuser@gmail.com'
-* set SCS_PASS='T3s7U$erPass123*'
+* set SCS_USER=testuser@gmail.com
+* set SCS_PASS=T3s7U$erPass123*
 
 but with your own credentials ;)
 
@@ -45,8 +45,6 @@ it and I will be glad to solve it.
 
 
 ## FAQ
-
-<<<<<<< HEAD
 Q: What is the 'course' parameter?
 
 A: This is the typical url for a symfonycasts video: https://symfonycasts.com/screencast/symfony4/setup.
