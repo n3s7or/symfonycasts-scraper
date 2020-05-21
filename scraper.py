@@ -3,7 +3,6 @@ from sycs import SimpleSymfonycastScraper as Scs
 
 
 def main():
-	# Prompt user disabled, user and pass must be wired in the constructor
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--start', type=int, help='download from', default=1)
 	parser.add_argument('--end', type=int, help='download to', default=-1)

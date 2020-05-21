@@ -1,13 +1,22 @@
 import requests
 from bs4 import BeautifulSoup
 import os
+import logging
+from .UserAgents import UserAgent
 
 
 class SimpleSymfonycastScraper:
 
-    def __init__(self, course, start=None, end=-1):
+    def __init__(self, course, start=None, end=-1, debug=True):
         self.__session = None
         self.__token = None
+
+        logging.basicConfig(
+            format='%(asctime)s %(message)s',
+            filename='scraper.log',
+            level=logging.DEBUG if debug else logging.INFO
+        )
+
         try:
             self.__user_email = os.environ['SCS_USER']
             self.__user_passw = os.environ['SCS_PASS']
@@ -24,13 +33,6 @@ class SimpleSymfonycastScraper:
         self.__BASE_URL = 'https://symfonycasts.com'
         self.__LOGIN_URL = '/login'
         self.__LOGIN_CHECK = '/login_check'
-        self.__USER_AGENTS = {
-            'mozilla': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:60.0) Gecko/20100101 Firefox/60.0',
-            'chrome': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 '
-                      'Safari/537.36',
-            'safari': 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, '
-                      'like Gecko) Version/10.0 Mobile/14E304 Safari/602.1 '
-        }
         self.__DOWNLOAD_SUFFIX = '/download/video'
 
     def get_direct_links(self):
@@ -45,10 +47,26 @@ class SimpleSymfonycastScraper:
                 self.__rango['end'] = len(dynamic_download_links)
 
             for i in range(self.__rango['start'] - 1, self.__rango['end']):
-                yield self.__session.head(self.__session.head(dynamic_download_links[i]).headers['location']).headers[
-                    'location']
+                link = dynamic_download_links[i]
+                res_head = self.__session.head(link)
+
+                if res_head.status_code == requests.codes.forbidden:
+                    raise Exception("You don't have privileges (%s)" % res_head.url)
+
+                logging.debug('Headers from HEAD dynamic links')
+                res_head = self.__session.head(res_head.headers['location'])
+                logging.debug(res_head.headers)
+
+                yield res_head.headers['location']
 
     def __gen_dyn_down_link(self, dsl):
+        """Yields download dynamic links to chapter's video.
+
+        Parameters
+        ----------
+        dsl : Generator
+            Download suffixes
+        """
         for i in dsl:
             yield self.__BASE_URL + i + self.__DOWNLOAD_SUFFIX
 
@@ -74,12 +92,13 @@ class SimpleSymfonycastScraper:
             raise Exception('Invalid username or pass.')
 
     def __get_token(self, html):
+        logging.debug(html)
         login_sub_btn = html.find(class_='login-submit-btn')
         return login_sub_btn.input['value']
 
     def __get_page_dom(self, url):
         headers = {
-            'user-agent': self.__USER_AGENTS['mozilla']
+            'user-agent': UserAgent.MOZILLA.name
         }
         r = self.__session.get(url=url, headers=headers)
         return BeautifulSoup(r.text, 'html.parser')
