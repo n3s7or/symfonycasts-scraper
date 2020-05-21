@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import os
 import logging
+from .UserAgents import UserAgent
 
 
 class SimpleSymfonycastScraper:
@@ -10,10 +11,11 @@ class SimpleSymfonycastScraper:
         self.__session = None
         self.__token = None
 
-        if debug:
-            logging.basicConfig(filename='scraper.log', level=logging.DEBUG)
-        else:
-            pass
+        logging.basicConfig(
+            format='%(asctime)s %(message)s',
+            filename='scraper.log',
+            level=logging.DEBUG if debug else logging.INFO
+        )
 
         try:
             self.__user_email = os.environ['SCS_USER']
@@ -31,13 +33,6 @@ class SimpleSymfonycastScraper:
         self.__BASE_URL = 'https://symfonycasts.com'
         self.__LOGIN_URL = '/login'
         self.__LOGIN_CHECK = '/login_check'
-        self.__USER_AGENTS = {
-            'mozilla': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:60.0) Gecko/20100101 Firefox/60.0',
-            'chrome': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 '
-                      'Safari/537.36',
-            'safari': 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, '
-                      'like Gecko) Version/10.0 Mobile/14E304 Safari/602.1 '
-        }
         self.__DOWNLOAD_SUFFIX = '/download/video'
 
     def get_direct_links(self):
@@ -59,9 +54,7 @@ class SimpleSymfonycastScraper:
                     raise Exception("You don't have privileges (%s)" % res_head.url)
 
                 logging.debug('Headers from HEAD dynamic links')
-                logging.debug(res_head.headers)
                 res_head = self.__session.head(res_head.headers['location'])
-                logging.debug('Headers from HEAD locations')
                 logging.debug(res_head.headers)
 
                 yield res_head.headers['location']
@@ -105,7 +98,7 @@ class SimpleSymfonycastScraper:
 
     def __get_page_dom(self, url):
         headers = {
-            'user-agent': self.__USER_AGENTS['mozilla']
+            'user-agent': UserAgent.MOZILLA.name
         }
         r = self.__session.get(url=url, headers=headers)
         return BeautifulSoup(r.text, 'html.parser')

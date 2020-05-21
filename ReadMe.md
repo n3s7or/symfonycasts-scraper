@@ -39,7 +39,7 @@ it and I will be glad to solve it.
 
 ## FAQ
 
-Q: This software can be used to get direct link to videos without 
+Q: This software can be used to get paid videos' direct link without 
 a paid subscription?
 
 A: No.
@@ -51,7 +51,7 @@ that makes a web scraping solution temporary.
 
 Q: How can I test if it still working?
 
-A: Hmm... Perhaps buy specifying a free course like [symfony4](https://symfonycasts.com/screencast/symfony4) 
+A: Hmm... Perhaps by specifying a free course like [symfony4](https://symfonycasts.com/screencast/symfony4) 
 (it was free by the time I was writting this).
 
 Q: Do I need credentials to get links from a free course?
@@ -62,4 +62,7 @@ Q: ...?
 
 A: ...
 
+
+## Disclaimer
+Whatever happens it's on you.
 
