@@ -1,6 +1,7 @@
 # My symfonycasts.com scrapper
 
-My first <del>serious</del> scrapping learning project. It's a harmless python script that scrape the video link location of a paid subscription on [Symfonycasts](https://symfonycasts.com/) for the given course.
+My first <del>serious</del> scrapping learning project. It's a harmless python script that scrape 
+the video link location of a paid subscription on [Symfonycasts](https://symfonycasts.com/) for the given course.
 
 Here is the usage:
 ```
@@ -18,11 +19,17 @@ COURSE is not optional, you must provide it. For example:
 $ symfonycasts_scraper.py --course symfony4
 ```
 
-In order to provide credentials you must set the following:
+In order to provide credentials you must set the following environment variables:
+
+Linux like:
 * export SCS_USER='testuser@gmail.com'
 * export SCS_PASS='T3s7U$erPass123*'
 
-but with your own log in credentials ;)
+Windows:
+* set SCS_USER='testuser@gmail.com'
+* set SCS_PASS='T3s7U$erPass123*'
+
+but with your own credentials ;)
 
 It will return the video links from the 
 [Stellar Development with Symfony 4](https://symfonycasts.com/screencast/symfony)
@@ -39,8 +46,13 @@ it and I will be glad to solve it.
 
 ## FAQ
 
+Q: What is the 'course' parameter?
+
+A: This is the typical url for a symfonycasts video: https://symfonycasts.com/screencast/symfony4/setup.
+The course is the text after /screencasts/, i.e. symfony4
+
 Q: This software can be used to get direct link to videos without 
-a paid subscription?
+A paid subscription?
 
 A: No.
 
