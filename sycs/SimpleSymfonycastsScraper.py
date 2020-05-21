@@ -58,9 +58,13 @@ class SimpleSymfonycastScraper:
                 if res_head.status_code == requests.codes.forbidden:
                     raise Exception("You don't have privileges (%s)" % res_head.url)
 
+                logging.debug('Headers from HEAD dynamic links')
+                logging.debug(res_head.headers)
+                res_head = self.__session.head(res_head.headers['location'])
+                logging.debug('Headers from HEAD locations')
                 logging.debug(res_head.headers)
 
-                yield self.__session.head(res_head.headers['location']).headers['location']
+                yield res_head.headers['location']
 
     def __gen_dyn_down_link(self, dsl):
         """Yields download dynamic links to chapter's video.
