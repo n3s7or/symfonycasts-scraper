@@ -99,6 +99,7 @@ class SimpleSymfonycastScraper:
             raise Exception('Invalid username or pass.')
 
     def __get_token(self, html):
+        logging.debug(html)
         login_sub_btn = html.find(class_='login-submit-btn')
         return login_sub_btn.input['value']
 
