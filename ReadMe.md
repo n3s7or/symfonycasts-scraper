@@ -19,6 +19,10 @@ COURSE is not optional, you must provide it. For example:
 $ symfonycasts_scraper.py --course symfony4
 ```
 
+Note that END should be equal or less than the actual number of videos, 
+if a greater value is specified that value will be ignored and links will be gotten 
+up to the actual max number of videos. 
+
 In order to provide credentials you must set the following environment variables:
 
 Linux like:

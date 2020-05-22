@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import os
 import logging
 from .UserAgents import get_random_user_agent
-from .SYCSExceptions import CredentialsException, WrongRangeException
+from .SYCSExceptions import CredentialsException, WrongRangeException, ForbiddenException
 
 
 # Constants
@@ -28,20 +28,13 @@ class SimpleSymfonycastScraper:
         except KeyError:
             raise CredentialsException
 
-        if start is not None and end is not None:
-            if start < 1 or end < 1:
-                raise WrongRangeException
-            elif start > end:
-                raise WrongRangeException
-
         self.__session = None
         self.__token = None
         self.__useragent = get_random_user_agent()
 
-
         self.__range = {
-            'start': start is not None if start else 1,
-            'end': end
+            'start': start if start is not None else 1,
+            'end': end if end is not None else -1
         }
         self.__curse = '/screencast/' + course
 
@@ -53,17 +46,22 @@ class SimpleSymfonycastScraper:
             dynamic_suffix_links = self.get_links(self.__get_page_dom(BASE_URL + self.__curse))
             dynamic_download_links = list(self.__gen_dyn_down_link(dynamic_suffix_links))
 
-            if self.__range['end'] < 1:
-                self.__range['end'] = len(dynamic_download_links)
+            num_videos = len(dynamic_download_links)
+            if self.__range['start'] > num_videos \
+                    or self.__range['start'] < 1 \
+                    or (self.__range['end'] != -1 and self.__range['start'] > self.__range['end']):
+                raise WrongRangeException
+
+            if self.__range['end'] < 1 or self.__range['end'] > num_videos:
+                self.__range['end'] = num_videos
 
             for i in range(self.__range['start'] - 1, self.__range['end']):
                 link = dynamic_download_links[i]
                 res_head = self.__session.head(link)
 
                 if res_head.status_code == requests.codes.forbidden:
-                    raise Exception("You don't have privileges (%s)" % res_head.url)
+                    raise ForbiddenException
 
-                logging.debug('Headers from HEAD dynamic links')
                 res_head = self.__session.head(res_head.headers['location'])
                 logging.debug(res_head.headers)
 
@@ -71,13 +69,7 @@ class SimpleSymfonycastScraper:
 
     @staticmethod
     def __gen_dyn_down_link(dsl):
-        """Yields download dynamic links to chapter's video.
-
-        Parameters
-        ----------
-        dsl : Generator
-            Download suffixes
-        """
+        """Yields download dynamic links to chapter's video."""
         for i in dsl:
             yield BASE_URL + i + DOWNLOAD_SUFFIX
 
