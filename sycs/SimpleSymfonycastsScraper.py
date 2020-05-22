@@ -2,15 +2,20 @@ import requests
 from bs4 import BeautifulSoup
 import os
 import logging
-from .UserAgents import UserAgent
+from .UserAgents import get_random_user_agent
+from .SYCSExceptions import CredentialsException, WrongRangeException
+
+
+# Constants
+BASE_URL = 'https://symfonycasts.com'
+LOGIN_URL = '/login'
+LOGIN_CHECK = '/login_check'
+DOWNLOAD_SUFFIX = '/download/video'
 
 
 class SimpleSymfonycastScraper:
 
-    def __init__(self, course, start=None, end=-1, debug=True):
-        self.__session = None
-        self.__token = None
-
+    def __init__(self, course, start=None, end=None, debug=True):
         logging.basicConfig(
             format='%(asctime)s %(message)s',
             filename='scraper.log',
@@ -21,32 +26,37 @@ class SimpleSymfonycastScraper:
             self.__user_email = os.environ['SCS_USER']
             self.__user_passw = os.environ['SCS_PASS']
         except KeyError:
-            raise Exception('Username or password not provided as environment variables (SCS_USER and SCS_PASS).')
+            raise CredentialsException
 
-        self.__rango = {
+        if start is not None and end is not None:
+            if start < 1 or end < 1:
+                raise WrongRangeException
+            elif start > end:
+                raise WrongRangeException
+
+        self.__session = None
+        self.__token = None
+        self.__useragent = get_random_user_agent()
+
+
+        self.__range = {
             'start': start is not None if start else 1,
             'end': end
         }
         self.__curse = '/screencast/' + course
 
-        # Constants
-        self.__BASE_URL = 'https://symfonycasts.com'
-        self.__LOGIN_URL = '/login'
-        self.__LOGIN_CHECK = '/login_check'
-        self.__DOWNLOAD_SUFFIX = '/download/video'
-
     def get_direct_links(self):
         with requests.Session() as self.__session:
-            self.__token = self.__get_token(self.__get_page_dom(self.__BASE_URL + self.__LOGIN_URL))
+            self.__token = self.get_token(self.__get_page_dom(BASE_URL + LOGIN_URL))
             self.__authenticate()
 
-            dynamic_suffix_links = self.__get_links(self.__get_page_dom(self.__BASE_URL + self.__curse))
+            dynamic_suffix_links = self.get_links(self.__get_page_dom(BASE_URL + self.__curse))
             dynamic_download_links = list(self.__gen_dyn_down_link(dynamic_suffix_links))
 
-            if self.__rango['end'] < 1:
-                self.__rango['end'] = len(dynamic_download_links)
+            if self.__range['end'] < 1:
+                self.__range['end'] = len(dynamic_download_links)
 
-            for i in range(self.__rango['start'] - 1, self.__rango['end']):
+            for i in range(self.__range['start'] - 1, self.__range['end']):
                 link = dynamic_download_links[i]
                 res_head = self.__session.head(link)
 
@@ -59,7 +69,8 @@ class SimpleSymfonycastScraper:
 
                 yield res_head.headers['location']
 
-    def __gen_dyn_down_link(self, dsl):
+    @staticmethod
+    def __gen_dyn_down_link(dsl):
         """Yields download dynamic links to chapter's video.
 
         Parameters
@@ -68,14 +79,21 @@ class SimpleSymfonycastScraper:
             Download suffixes
         """
         for i in dsl:
-            yield self.__BASE_URL + i + self.__DOWNLOAD_SUFFIX
+            yield BASE_URL + i + DOWNLOAD_SUFFIX
 
-    def __get_links(self, html):
+    @staticmethod
+    def get_links(html):
         chapter_list = html.find('ul', class_='chapter-list')
         chapter_list_item = chapter_list.find_all('li')
         for item in chapter_list_item:
             if item.a['class'][0] != 'js-no-follow-link':
                 yield item.a['href']
+
+    @staticmethod
+    def get_token(html):
+        logging.debug(html)
+        login_sub_btn = html.find(class_='login-submit-btn')
+        return login_sub_btn.input['value']
 
     def __authenticate(self):
         data = {
@@ -83,22 +101,17 @@ class SimpleSymfonycastScraper:
             '_email': self.__user_email,
             '_password': self.__user_passw,
             '_submit': '',
-            '_target_pat': self.__BASE_URL
+            '_target_pat': BASE_URL
         }
 
-        r = self.__session.post(self.__BASE_URL + self.__LOGIN_CHECK, data=data)
+        r = self.__session.post(BASE_URL + LOGIN_CHECK, data=data)
 
-        if r.url == self.__BASE_URL + self.__LOGIN_URL:
+        if r.url == BASE_URL + LOGIN_URL:
             raise Exception('Invalid username or pass.')
-
-    def __get_token(self, html):
-        logging.debug(html)
-        login_sub_btn = html.find(class_='login-submit-btn')
-        return login_sub_btn.input['value']
 
     def __get_page_dom(self, url):
         headers = {
-            'user-agent': UserAgent.MOZILLA.name
+            'user-agent': self.__useragent
         }
         r = self.__session.get(url=url, headers=headers)
         return BeautifulSoup(r.text, 'html.parser')

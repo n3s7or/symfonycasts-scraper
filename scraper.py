@@ -9,7 +9,11 @@ def main():
 	parser.add_argument('--course', required=True, help='Course\'s name')
 	args = parser.parse_args()
 
-	symfonycasts = Scs(course=args.course, start=args.start, end=args.end)
+	try:
+		symfonycasts = Scs(course=args.course, start=args.start, end=args.end)
+	except Exception as e:
+		print("\nError: %s\n" % e)
+		return
 
 	with open('out.txt', 'w') as f:
 		for direct_link in symfonycasts.get_direct_links():
