@@ -1,1 +1,1 @@
-from .SimpleSymfonycastsScraper import SimpleSymfonycastScraper
+from .symfonycastsscraper import SimpleSymfonycastScraper

@@ -1,27 +1,38 @@
 # My symfonycasts.com scrapper
 
 My first <del>serious</del> scrapping learning project. It's a harmless python script that scrape 
-the video link location of a paid subscription on [Symfonycasts](https://symfonycasts.com/) for the given course.
+the video link location on [Symfonycasts](https://symfonycasts.com/) for the given course.
 
 Here is the usage:
 ```
-usage: scraper.py [-h] [--start START] [--end END] --course COURSE
+usage: scraper.py [-h] [--start START] [--end END] [--free] course
+
+positional arguments:
+  course         course's name
 
 optional arguments:
-  -h, --help       show this help message and exit
-  --start START    download from
-  --end END        download to
-  --course COURSE  Course's name
+  -h, --help     show this help message and exit
+  --start START  download from
+  --end END      download to
+  --free         free course, no need to authenticate
+
 ```  
 COURSE is not optional, you must provide it. For example:
 
 ```
-$ symfonycasts_scraper.py --course symfony4
+$ symfonycasts_scraper.py symfony
 ```
 
 Note that END should be equal or less than the actual number of videos, 
 if a greater value is specified that value will be ignored and links will be gotten 
-up to the actual max number of videos. 
+up to the actual max number of videos.
+
+Note also that if you want free videos you don't need to authenticate, so no need to provide credentials,
+just for a free course run:
+
+```
+$ symfonycasts_scraper.py --course symfony4 --free
+```
 
 In order to provide credentials you must set the following environment variables:
 
@@ -41,6 +52,24 @@ in a file named out.txt
 
 Probably it has some bugs. Feel free to help.
 
+## Examples
+
+* Get full course (this one was paid, at the time I wrote this)
+```
+$ symfonycasts_scraper.py symfony
+```
+
+* Get full course (this one was free, at the time I wrote this)
+
+```
+$ symfonycasts_scraper.py --free symfony4
+```
+
+* Get chapters from 5 to 10
+
+```
+$ symfonycasts_scraper.py --free --start 5 --end 10 symfony4
+```
 
 ## TODO list 
 
@@ -70,7 +99,11 @@ A: Hmm... Perhaps by specifying a free course like [symfony4](https://symfonycas
 
 Q: Do I need credentials to get links from a free course?
 
-A: So far you do.
+A: No, you don't, but remember to add the free argument
+
+Q: Did you just invented these FAQ?
+
+A: Yes....
 
 Q: ...?
 
