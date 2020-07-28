@@ -1,9 +1,9 @@
 import requests
 from bs4 import BeautifulSoup
 import os
-import logging
 from .sycsexceptions import *
 from .requestshelper import RequestsHelper, Methods
+from urllib.parse import urlparse
 
 # Constants
 BASE_URL = 'https://symfonycasts.com'
@@ -14,12 +14,7 @@ DOWNLOAD_SUFFIX = '/download/video'
 
 class SimpleSymfonycastScraper:
 
-    def __init__(self, course, start=None, end=None, debug=True):
-        logging.basicConfig(
-            format='%(asctime)s %(message)s',
-            filename='scraper.log',
-            level=logging.DEBUG if debug else logging.INFO
-        )
+    def __init__(self, course, start=None, end=None):
 
         self.request = RequestsHelper()
 
@@ -50,7 +45,7 @@ class SimpleSymfonycastScraper:
             link = dynamic_download_links[i]
             res_head = self.request.call(link, Methods.HEAD)
 
-            if res_head.status_code == requests.codes.forbidden:
+            if res_head.status_code == requests.codes.forbidden or urlparse(res_head.url).path == '/login':
                 raise ForbiddenException
 
             yield res_head.url

@@ -19,16 +19,12 @@ def main():
 	if not args.free:
 		symfonycasts.authenticate()
 
-	links = []
-	# try:
-	for direct_link in symfonycasts.get_direct_links():
-		print(direct_link)
-		links.append(direct_link)
-	# except Exception as e:
-	# 	print("\nError: %s\n" % e)
-
-	# with open('out.txt', 'w') as f:
-	# 	f.write("\n")
+	try:
+		with open('out.txt', 'w') as f:
+			for direct_link in symfonycasts.get_direct_links():
+				f.write(direct_link + '\n')
+	except Exception as e:
+		print("\nError: %s\n" % e)
 
 
 if __name__ == '__main__':
