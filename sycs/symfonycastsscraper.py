@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import os
+import pickle
 from .sycsexceptions import *
 from .requestshelper import RequestsHelper, Methods
 from urllib.parse import urlparse
@@ -10,13 +11,19 @@ BASE_URL = 'https://symfonycasts.com'
 LOGIN_URL = '/login'
 LOGIN_CHECK = '/login_check'
 DOWNLOAD_SUFFIX = '/download/video'
+SESSION_FILE = 'session'
 
 
 class SimpleSymfonycastScraper:
 
     def __init__(self, course, start=None, end=None):
-
-        self.request = RequestsHelper()
+        # Try to reuse a previous saved session
+        try:
+            with open(SESSION_FILE, 'rb') as f:
+                self.request = pickle.load(f)
+        except IOError:
+            print('No session object found')
+            self.request = RequestsHelper()
 
         self.range = {
             'start': start if start is not None else 1,
@@ -75,8 +82,13 @@ class SimpleSymfonycastScraper:
 
     def authenticate(self):
         r = self.request.call(url=BASE_URL + LOGIN_URL, method=Methods.GET)
-        token = self.get_token(self.get_dom(r.text))
 
+        if urlparse(r.url).path != '/login':
+            # Already authenticated
+            print('Still valid session object.')
+            return
+
+        token = self.get_token(self.get_dom(r.text))
         try:
             user_email = os.environ['SCS_USER']
             user_passw = os.environ['SCS_PASS']
@@ -98,3 +110,14 @@ class SimpleSymfonycastScraper:
                 raise TooManyException
             else:
                 raise InvalidCredentialsException
+        else:
+            try:
+                with open(SESSION_FILE, 'wb') as f:
+                    pickle.dump(self.request, f)
+                    print('Session file created')
+            except IOError:
+                print("""
+                Couln't save session object. If you automated several courses scraping yo could be temporary
+                restricted to log in to https://symfonycasts.com due to 'Login rate limit hit'. I suggest you
+                to schedule srcaping jobs.
+                """)

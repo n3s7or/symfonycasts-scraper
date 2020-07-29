@@ -1,4 +1,5 @@
 import argparse
+from os import environ
 from sycs import SimpleSymfonycastScraper as Scs
 
 
@@ -19,9 +20,13 @@ def main():
 	if not args.free:
 		symfonycasts.authenticate()
 
+	print_link = environ.get('PRINT_LINK', None)
+
 	try:
 		with open('out.txt', 'w') as f:
 			for direct_link in symfonycasts.get_direct_links():
+				if print_link:
+					print(direct_link)
 				f.write(direct_link + '\n')
 	except Exception as e:
 		print("\nError: %s\n" % e)
