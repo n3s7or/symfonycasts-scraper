@@ -17,7 +17,7 @@ optional arguments:
   --free         free course, no need to authenticate
 
 ```  
-COURSE is not optional, you must provide it. For example:
+**course** is not optional, you must provide it. For example:
 
 ```
 $ symfonycasts_scraper.py symfony
@@ -27,24 +27,26 @@ Note that END should be equal or less than the actual number of videos,
 if a greater value is specified that value will be ignored and links will be gotten 
 up to the actual max number of videos.
 
-Note also that if you want free videos you don't need to authenticate, so no need to provide credentials,
+Note also that if you want **free videos** you don't need to authenticate, so **no** need to provide **credentials**,
 just for a free course run:
 
 ```
 $ symfonycasts_scraper.py --course symfony4 --free
 ```
 
-In order to provide credentials you must set the following environment variables:
+In order to provide credentials you should set the following environment variables:
 
 Linux like:
-* export SCS_USER=testuser@gmail.com
-* export SCS_PASS=T3s7U$erPass123*
+* `export SCS_USER=testuser@gmail.com`
+* `export SCS_PASS=T3s7U$erPass123*`
 
 Windows:
-* set SCS_USER=testuser@gmail.com
-* set SCS_PASS=T3s7U$erPass123*
+* `set SCS_USER=testuser@gmail.com`
+* `set SCS_PASS=T3s7U$erPass123*`
 
 but with your own credentials ;)
+
+**If those variables are not set, user will be prompted to introduce credentials** 
 
 It will return the video links from the 
 [Stellar Development with Symfony 4](https://symfonycasts.com/screencast/symfony)
@@ -101,7 +103,7 @@ Q: Do I need credentials to get links from a free course?
 
 A: No, you don't, but remember to add the free argument
 
-Q: Did you just invented these FAQ?
+Q: Did you just invented those FAQs?
 
 A: Yes....
 
@@ -111,5 +113,14 @@ A: ...
 
 
 ## Disclaimer
-Whatever happens it's on you.
+I am not responsible for any bad intended usage of this script. 
 
+According to [SymfonyCasts Terms of Service](https://symfonycasts.com/terms)
+the only term this scripts doesn't follow is related to the relationship costumer - service provider: 
+
+> By using our services, you agree to access them through our interface and not to attempt circumventing our system
+
+#### Other Symfonycasts' conditions of interest
+> Our products are for your personal use. We work hard to provide you with a quality product and expect that you won't try to resell, copy, or make our products available to others without our written permission. If you love our product enough to pass it along, please just ask us for permission.
+
+If you want to read a probably more updated Symfonycasts' Terms of service take a look at [SymfonyCasts Terms of Service](https://symfonycasts.com/terms)

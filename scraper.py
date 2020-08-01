@@ -1,6 +1,25 @@
+import os
 import argparse
-from os import environ
+from getpass import getpass
 from sycs import SimpleSymfonycastScraper as Scs
+
+
+def get_credentials() -> dict:
+	"""Provide user's credentials
+
+	Loads credentials from database or environment variables when posible, else it prompts the user
+	"""
+	# TODO Load from database
+
+	user_email = os.environ.get('SCS_USER', None)
+	user_passw = os.environ.get('SCS_PASS', None)
+
+	if not user_email:
+		user_email = input('Email: ')
+	if not user_passw:
+		user_passw = getpass()
+
+	return dict(email=user_email, password=user_passw)
 
 
 def main():
@@ -18,9 +37,9 @@ def main():
 		return
 
 	if not args.free:
-		symfonycasts.authenticate()
+		symfonycasts.authenticate(**get_credentials())
 
-	print_link = environ.get('PRINT_LINK', None)
+	print_link = os.environ.get('PRINT_LINK', None)
 
 	try:
 		with open('out.txt', 'w') as f:

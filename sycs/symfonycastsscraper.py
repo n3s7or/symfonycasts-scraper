@@ -1,6 +1,5 @@
 import requests
 from bs4 import BeautifulSoup
-import os
 import pickle
 from .sycsexceptions import *
 from .requestshelper import RequestsHelper, Methods
@@ -80,25 +79,20 @@ class SimpleSymfonycastScraper:
     def get_dom(text):
         return BeautifulSoup(text, 'html.parser')
 
-    def authenticate(self):
+    def authenticate(self, email, password):
         r = self.request.call(url=BASE_URL + LOGIN_URL, method=Methods.GET)
 
         if urlparse(r.url).path != '/login':
             # Already authenticated
             print('Still valid session object.')
-            return
+            return True
 
         token = self.get_token(self.get_dom(r.text))
-        try:
-            user_email = os.environ['SCS_USER']
-            user_passw = os.environ['SCS_PASS']
-        except KeyError:
-            raise CredentialsException
 
         data = {
             '_csrf_token': token,
-            '_email': user_email,
-            '_password': user_passw,
+            '_email': email,
+            '_password': password,
             '_submit': '',
             '_target_pat': BASE_URL
         }
@@ -117,7 +111,7 @@ class SimpleSymfonycastScraper:
                     print('Session file created')
             except IOError:
                 print("""
-                Couln't save session object. If you automated several courses scraping yo could be temporary
+                Couln't save session object. If you automated several courses scraping your account could be temporary
                 restricted to log in to https://symfonycasts.com due to 'Login rate limit hit'. I suggest you
                 to schedule srcaping jobs.
                 """)
