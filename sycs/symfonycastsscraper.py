@@ -72,8 +72,8 @@ class SimpleSymfonycastScraper:
 
     @staticmethod
     def get_token(html):
-        login_sub_btn = html.find(class_='login-submit-btn')
-        return login_sub_btn.input['value']
+        token = html.find('input', type='hidden')
+        return token['value']
 
     @staticmethod
     def get_dom(text):
